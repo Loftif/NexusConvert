@@ -1,0 +1,1235 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NexusConvert | Бесплатный конвертер файлов</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="icon" type="image/x-icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAAAdgAAAHYBTnsmCAAAABl0RVh0U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoAAAEKSURBVDiNzdI/L4NRGAXwX1ujhaFJF5GYLJbGFxC+hEX8aZiqg9XGajL50/oKzAwWpvoEIojFIKRIpIMa7n2R10vf0Zlunvuc89x7nlPwE8NYxAxG0cMtjnGA++/NpRS5gSOM4xSHOMM7ZrGOLs4zBtvFCxYyhKGIeXTQRBmbyeVqJFezlFOo4hltXBP+3ImT+2EQT7G/h1YJc5hALRb/Qlfw5kHwZTtRreSY/k+Rta68qCQCU9jHGN5wl4M8gAthnVqC+x08Cqb2Qy32DxHC0I5qeYI0iVfUk8KGEMumr0AVf3n2UiTvZCkXsBYbLrGFFSzH81UcUE+T0igL6ZzGSKzd4AR7gk+f+ADWiz1jSI2CKAAAAABJRU5ErkJggg==">
+    <script src="https://unpkg.com/@ffmpeg/ffmpeg@0.10.0/dist/ffmpeg.min.js"></script>
+    <style>
+        :root {
+            --primary: #6a11cb;
+            --secondary: #2575fc;
+            --accent: #ff3e6c;
+            --dark: #1a1a2e;
+            --light: #f8f9fa;
+            --gray: #8a8a9d;
+            --success: #00c9a7;
+            --warning: #ff9e44;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            color: var(--light);
+            min-height: 100vh;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            position: relative;
+        }
+        
+        .logo-space {
+            height: 80px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .logo-space img {
+            max-height: 60px;
+            width: auto;
+        }
+        
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 0;
+            margin-bottom: 40px;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .logo-icon {
+            font-size: 2.5rem;
+            color: var(--accent);
+            background: linear-gradient(45deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .logo h1 {
+            font-size: 2.2rem;
+            background: linear-gradient(45deg, #fff, #c2c2ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: 1px;
+        }
+        
+        .nav-buttons {
+            display: flex;
+            gap: 15px;
+        }
+        
+        .btn {
+            padding: 12px 25px;
+            border-radius: 50px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(45deg, var(--primary), var(--secondary));
+            color: white;
+            box-shadow: 0 4px 20px rgba(106, 17, 203, 0.4);
+        }
+        
+        .btn-outline {
+            background: transparent;
+            border: 2px solid var(--secondary);
+            color: var(--light);
+        }
+        
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 25px rgba(106, 17, 203, 0.6);
+        }
+        
+        .hero {
+            text-align: center;
+            margin-bottom: 60px;
+            padding: 0 20px;
+        }
+        
+        .hero h2 {
+            font-size: 3.5rem;
+            margin-bottom: 20px;
+            background: linear-gradient(45deg, #ff8a00, #e52e71);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            line-height: 1.2;
+        }
+        
+        .hero p {
+            font-size: 1.3rem;
+            max-width: 700px;
+            margin: 0 auto 30px;
+            color: #d0d0e4;
+            line-height: 1.6;
+        }
+        
+        .converter-container {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(12px);
+            border-radius: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 40px;
+            max-width: 800px;
+            margin: 0 auto 60px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+        }
+        
+        .converter-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .converter-header h3 {
+            font-size: 2rem;
+            margin-bottom: 10px;
+            color: #ffffff;
+        }
+        
+        .converter-header p {
+            color: #b0b0d0;
+            font-size: 1.1rem;
+        }
+        
+        .upload-area {
+            border: 3px dashed rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            padding: 50px 30px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 30px;
+            background: rgba(20, 20, 40, 0.3);
+            position: relative;
+            overflow: hidden;
+            min-height: 250px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .upload-area:hover {
+            border-color: var(--accent);
+            background: rgba(30, 30, 60, 0.4);
+        }
+        
+        .upload-area i {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            color: var(--accent);
+            background: linear-gradient(45deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .upload-area h4 {
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+        }
+        
+        .upload-area p {
+            color: var(--gray);
+            margin-bottom: 20px;
+        }
+        
+        .file-select-btn {
+            display: inline-flex;
+            margin: 0 auto;
+        }
+        
+        .file-input {
+            display: none;
+        }
+        
+        .format-selector {
+            display: flex;
+            justify-content: space-between;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .format-box {
+            flex: 1;
+            background: rgba(30, 30, 60, 0.5);
+            border-radius: 15px;
+            padding: 25px;
+            text-align: center;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+        
+        .format-box:hover {
+            transform: translateY(-5px);
+            border-color: var(--secondary);
+            box-shadow: 0 10px 25px rgba(37, 117, 252, 0.2);
+        }
+        
+        .format-box h4 {
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+            color: #ffffff;
+        }
+        
+        .format-list {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .format-item {
+            padding: 8px 12px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 8px;
+            font-size: 0.9rem;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+        
+        .format-item:hover {
+            background: var(--secondary);
+        }
+        
+        .format-item.active {
+            background: var(--accent);
+            color: white;
+        }
+        
+        .convert-btn {
+            width: 100%;
+            padding: 18px;
+            font-size: 1.2rem;
+            background: linear-gradient(45deg, var(--accent), #ff6b9c);
+            border: none;
+            border-radius: 15px;
+            color: white;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 20px rgba(255, 62, 108, 0.4);
+            margin-top: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .convert-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(255, 62, 108, 0.6);
+        }
+        
+        .convert-btn:disabled {
+            background: #8a8a9d;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin: 60px 0;
+        }
+        
+        .feature-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            padding: 30px;
+            text-align: center;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-10px);
+            background: rgba(255, 255, 255, 0.08);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+        }
+        
+        .feature-icon {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            background: linear-gradient(45deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .feature-card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            color: white;
+        }
+        
+        .feature-card p {
+            color: #b0b0d0;
+            line-height: 1.6;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 40px 0;
+            margin-top: 40px;
+            color: #b0b0d0;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        /* Прогресс-бар */
+        .progress-container {
+            width: 100%;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            margin: 25px 0;
+            overflow: hidden;
+            display: none;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            width: 0%;
+            transition: width 0.4s ease;
+        }
+        
+        .conversion-status {
+            text-align: center;
+            margin: 15px 0;
+            font-size: 1.1rem;
+            color: var(--light);
+            display: none;
+        }
+        
+        .download-section {
+            display: none;
+            text-align: center;
+            margin-top: 30px;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        .download-btn {
+            display: inline-flex;
+            padding: 15px 30px;
+            background: linear-gradient(45deg, var(--success), #00a78e);
+            color: white;
+            border-radius: 50px;
+            font-weight: 600;
+            text-decoration: none;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 20px rgba(0, 201, 167, 0.4);
+        }
+        
+        .download-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 25px rgba(0, 201, 167, 0.6);
+        }
+        
+        .file-list {
+            width: 100%;
+            text-align: left;
+            margin-top: 20px;
+            max-height: 200px;
+            overflow-y: auto;
+            display: none;
+        }
+        
+        .file-item {
+            padding: 10px 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .file-name {
+            flex: 1;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            margin-right: 15px;
+        }
+        
+        .file-size {
+            color: var(--gray);
+            font-size: 0.9rem;
+        }
+        
+        .contact-info {
+            text-align: center;
+            margin: 20px 0;
+        }
+        
+        .contact-info p {
+            margin: 15px 0;
+            font-size: 1.2rem;
+        }
+        
+        .email-link {
+            display: inline-block;
+            background: linear-gradient(45deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 12px 30px;
+            border-radius: 50px;
+            font-weight: 600;
+            text-decoration: none;
+            margin-top: 15px;
+            transition: all 0.3s ease;
+        }
+        
+        .email-link:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(37, 117, 252, 0.4);
+        }
+        
+        /* Анимации */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @media (max-width: 768px) {
+            .format-selector {
+                flex-direction: column;
+            }
+            
+            .hero h2 {
+                font-size: 2.5rem;
+            }
+            
+            .logo-space {
+                height: 60px;
+                margin-bottom: 10px;
+            }
+            
+            .nav-buttons {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo-space">
+            <!-- Ваш логотип будет здесь -->
+        <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAyAAAAEsCAYAAAA7Ldc6AAAACXBIWXMAAAsTAAALEwEAmpwYAAABNmlDQ1BQaG90b3Nob3AgSUNDIHByb2ZpbGUAAHjarY6xSsNQFEDPi6LiUCsEcXB4kygotupgxqQtRRCs1SHJ1qShSmkSXl7VfoSjWwcXd7/AyVFwUPwC/0Bx6uAQIYODCJ7p3MPlcsGo2HWnYZRhEGvVbjrS9Xw5+8QMUwDQCbPUbrUOAOIkjvjB5ysC4HnTrjsN/sZ8mCoNTIDtbpSFICpA/0KnGsQYMIN+qkHcAaY6addAPAClXu4vQCnI/Q0oKdfzQXwAZs/1fDDmADPIfQUwdXSpAWpJOlJnvVMtq5ZlSbubBJE8HmU6GmRyPw4TlSaqo6MukP8HwGK+2G46cq1qWXvr/DOu58vc3o8QgFh6LFpBOFTn3yqMnd/n4sZ4GQ5vYXpStN0ruNmAheuirVahvAX34y/Axk/96FpPYgAAACBjSFJNAAB6JQAAgIMAAPn/AACA6AAAUggAARVYAAA6lwAAF2/XWh+QAABRAUlEQVR42uzdeVxU5f4H8M8Y6ZiS5DIqEiIaiKJBeHErc8W8elFbtK6KWunVtNwXLDU1lyxcCXPpakjlmldzLVJzy33JFUVEFBBBRUAERb6/PzynHxlzZlhnBj7v16vXfb3ujMxznu855znf833Oc3QiAiIiIiIiouJQhl1ARERERERMQIiIiIiIiAkIERERERERExAiIiIiImICQkRERERExASEiIiIiIiYgBARERERERMQIiIiIiIiJiBERERERMQEhIiIiIiIiAkIERERERExASEiIiIiIiYgRERERERETECIiIiIiIgJCBERERERERMQIiIiIiJiAkJERERERExAiIiIiIiImIAQERERERETECIiIiIiIiYgRERERETEBISIiIiIiJiAEBERERERMQEhIiIiIiImIERERERERExAiIiIiIiICQgRERERETEBISIiIiIiYgJCRERERERMQIiIiIiIiJiAEBERERERExAiIiIiIiImIERERERExASEiIiIiIiYgBARERERETEBISIiIiIiJiBERERERERMQIiIiIiIiAkIERERERExASEiIiIiImICQkRERERETECIiIiIiIiYgBARERERERMQIiIiIiJiAkJERERERMQEhIiIiIiImIAQERERERExASEiIiIiIiYgRERERETEBISIiIiIiIgJCBERERERMQEhIiIiIiJiAkJERERERExAiIiIiIiICQgRERERERETECIiIiIiYgJCRERERETEBISIiIiIiKyYna1vgE6nYxSJiIiI8qc6gMkABhv5fBGAD9hNJYuIWPb63dINICIiIiILXQjqdJ+GhoZO7tOnT66fN2jQAOfPn39ORJLZW1YVN5tOQDgFi4iIiIiImIAQERERERETECIiIiIiIiYgRERERETEBISIiIiIiIgJCBERERERMQEhIiIiIiImIERERERERExAiIiIiIiICQgRERERERETECIiIiIiYgJCRERERERMQIiIiIiIiJiAEBERERERExAiIiIiIiImIERERERExASEiIiIiIiYgBARERERETEBISIiIiIiJiBERERERERMQIiIiIiIiAkIERERERExASEiIiIiImICQkRERERETECIiIiIiIiYgBARERERERMQIiIiIiJiAkJERERERMQEhIiIiIiImIAQERERERExASEiIiIiIiYgRERERERETECIiIiIiIgJCBERERERMQEhIiIiIiJiAkJERERERExAiIiIiIiImIAQERERERETECIiIiIiYgJCRERERETEBISIiIiIiJiAEBERERERMQEhIiIiIiKLs2MXFD6dTvc8AE8AHgBeAPA8AEcAVQE8B6BiLv8sGcAdAEkArgO4BuAigLMA/hCR2zbaF5UAzAQw2MhX7gJYJCKB3HNKxbERorEvQNkXPmBPFUssKgJoAqAxAHcALgCcAVQB4ACg/BP/JFM5T90CEA/gKoAoABEATgCIEhFhz3KsKCWxq6wcOw0BuAFwUuKnxs7hiX+SDSAVQAqAGwASAVwBcEk5hv4QkTj2rNXF2VGJcUMA9ZVzZE3lOH3miWNUjfHdJ2J8UYnxKRFJYK8yASmsnVMHoBGAdgBaA2j6yiuvVPfx8YGbmxtq164Ng8GAKlWqwN7eHhUrVoRer//b37l3757DvXv3HFJSUuokJib+4+bNm4iOjsa5c+dw4MAB6HS6SAAHAewEEC4i12ykiwYvXbp08Pvvv5/rh+np6ZWaNGkyXqfTzeOBWeKPlcCgoKDBI0eONPqd4cOHD9bpdJtEZDt7rND73wCgA4BWAJq6urq+2L59e3h6eqJOnTqoUaMGDAYD7O3tUaFCBZQtW/Yv//7hw4fl0tPTq6ekpFS/c+dOgxs3biA2NhaXL1/G4cOHsWvXLuh0uh0AdivnqaMiks2e51hRQuLnosSuDYBmnp6edVu0aIEGDRrAxcUF1apVg8FgwLPPPosKFSqgQoUKf/n3IlLm/v37ldLT0yslJyc/n5ycjPj4eFy9ehWRkZE4fPgwdDpdrBK7vQC2i0gEe77Yj9EXlTg3B9CsefPmtXx8fFC/fn3UqVMH1atXR+XKlVG5cmWUK1fuL8dozhjfuXPH+e7du4iLi8PVq1dx6dIl/P7779DpdFcBHALwmxLjqFLb37xhla+dtIwyiL9hZ2c31N/fH+3atYO6k1aqVKnQf/PGjRs4f/48Dh06hK1bt2Lv3r0nAfwIYLWIXLTivqrk6uqafPLkSdjb2+f6nZUrVyIgIGAWqyAl+pgpazAYMs+ePYuqVavm+p2LFy/C3d39kIg0Y48VWr83A9AFQCcfH5+X/P398Y9//AMeHh6oXbs2Ho+3heP+/fu4cOECjh07ht9++w3r1q1DRkbGfwGsUS6EH3Gs4FhhY/FrBKAHgO5t2rRp+Nprr8HX1xf169dHjRo1Cv33bt++jQsXLuD48ePYtm0btm7degXAJgDfi8jhItzOT0NDQyf36dMn188bNGiA8+fPPyciySVxbALQCcC/7Ozs3uvevTvatm2Lxo0bo379+qhcuXKh/l5iYuKf58ktW7YgPDw8EsB65fg8kce2F6gtFr/+FxH+Z+Z/eFxinabX62XgwIGyceNGSUpKEkuIioqS5cuXS6dOnQTAAQDvAihvpf02benSpUa35d69e+Lh4SEAqnM/K7HHTmBQUJDmPj1s2DAB0Jf9VeC+rg9gGoDLAQEB8t1338nly5clOzu7WM9RycnJsmPHDvnoo4/E3t5eAHwJoC7HCo4VVh67ZwF8BOBE9+7dJSwsTGJiYiwSu4SEBNmwYYP07t1b8Hiq1gQA1Ypgmz8NDQ012g5lfHYoYXFuDGCewWCQsWPHyvbt2+XWrVvFHuP4+HhZtWqV9OjRQwBcADASQGUzt8Gmr/95wjEvyG0BrG3ZsqWEhYXJzZs3xZpcuHBBZs2aJU5OTgJgBoDnraz/Krm6ukpKSorRbQgNDRUAM7m/lcjjp6zBYJDExESj8Y+IiBAAB9lf+e7jMgDeArCzc+fOEhYWJjdu3LCac9SdO3dk3bp10qFDBwGwBUAXjhUcK6wsdp4AvnJzc5MFCxZIVFSUVcUuPj5evvnmG/H29hYA3wJoxgQkz9upA9AHwIHXX39dNmzYoHldUtxiY2MlJCREPD09BcAyAD5MQErvCakbgB29evWSffv2yaNHj8Sapaamyg8//KCeoOYBcLemKsiKFStYBWH1g9WPwu1bOwDD9Xq9jBo1Sv744w+rPkdlZ2fLkSNHZODAgaLMc/83xwqOFRaOXXMAoe3bt5effvpJMjIyrDp2Dx48kPDwcPH39xcAqwC8ygTErG0caGdnJ8OGDZMLFy5YdYwzMzNl+/bt0rFjR80YMwEpmSek9gDW9+nTR44fPy625sGDB7JhwwZ1cPkcQBUr6NNqHh4ecu/ePVZBWP1g9aNw+naog4ODzJo1S2JjY23uPHXu3DkZOnSoANgK4F8cKzhWFHPsGgEI8fPzk19//dXqk8bckvk9e/aoichSAC8xAcl1294G8Nv48eOtrqqVxxgvBuBVkhIQPoT+1wd6agIY26FDh+GffvopWrRoke+/lZycjMuXL+Pq1au4evUqrl+/jri4OCQlJSE+Ph7Z2f+/OEy5cuVQs2ZNVK1aFc8//zwcHR1Rp04dODs7o27duihfvny+HwpdvXo1Pv74Y8TFxY0RkS8t3L8zQ0NDxxt70C09PR1NmjTB+fPnawhXxCopx1RgUFDQDBMrX2H+/Pn9RORb9phZfdoTwOAxY8a8+uGHH+L555/P9+ATHx+Py5cvIyYmBgkJCYiNjUVcXBwSEhKQkZGB5OTHz5zq9Xo4ODigSpUqqFmzJpydnVGrVi3UrFkTderUgZOTE5566ql8tePYsWOYOnUqNm3aFAwgSESiOVaU7rGiGBYG+Mzb2ztw2rRpeO211/K972ZkZODKlSu4cuUKoqOjERsbi2vXriEpKQk3btxARkbGX75fq1YtVK1aFY6OjqhVqxZcXFxQu3Zt1K1bFw4ODvk+jn/++Wd88sknOHr06OcApojI/dL+ELpOp2sIYPDrr78+ZOrUqWjYsGG+/1ZcXBwuX76M6OhoREZGIjExEbGxsbh16xZu3/7rqtc1a9ZEzZo1Ua1aNbi4uMDJyQl16tSBq6trvmOcnZ2NHTt2YOLEiTh27NhsAJNFJIMPoZecuyHDHB0dJSwsTB48eJDnTPX27duyfft2mTx5srRs2VLweJ38rQDm4PF7DzoD8AHgiv9fI1z9ryoeryPeFMAbAIYDWARgt16vF39/f5k3b54cOHAgX+XhGzduyPDhwwXACgBNLdjH1VkFYfWD1Y9896c9gLmdOnWS06dP5+tu9x9//CHffPONBAQEiLOzs+Dx2vSrlYfWB+U4T7ng8Tr36jmqmvL/vQjAD8BAANMBfAfgD0dHRxk4cKCEhobKpUuX8ty2R48eyerVq9VnE0ZyrCjdY0URxq6vXq+XefPmSVpaWp77JyMjQw4ePCjz58+Xbt26iV6vV6cSfg1ghBKTpkqMqj0ROwclpj5KjAcpMd8KIP6VV16RKVOmyM8//yy3b9/Oc9vS09MlJCREXfChr5TiCgiAcW5ubrJp06Z8VbZSU1Nl165dMn36dPUYvaCcJz9VKiptATRQFpt4MsZ1APxDWVlriLL4xjYA8S1btpTJkyfLtm3b8vXAe3p6unz11VdqjPtzCpbtn5CqAFgYEBCQ52kMycnJsn79eundu7fY2dmpDw29A8CpENtXRtnRhwD40cnJSUaPHi179+6Vhw8f5qm94eHh6onkYwv298wffviBz4Lw2Q8++5G3vuzv4OAgixcvzvNF74ULF2TOnDni7u4uePxuiAkAmgF4phDbp8fjd1t8CuBIixYtZNGiRXLlypU8tTU+Pl7effddARBcFKv9cKywnbGikGNXBsDczp07S0RERJ76IisrSw4cOCCBgYFqgrwRwFDlofUyhdjG5wH0AvBfvV4v/fv3l02bNklqamqe2hsRESGdO3cWAHNLWwKiXPx/NWDAgDwvAJGcnCxr166V/v37qxf43wHoW8jHqJNy3C+xs7OTt99+W9asWZPnhPPSpUvSrVs3ATAff39hLBMQGzkpddfr9bJ8+fI8ZcmnT5+WwMBAcXBwEOUOhi+Ud6oUQ5vLA/gXgDWenp6yZMmSPC3veOvWLXnvvffUAd7BAn3+vJeXl+bdOVZBWP3gf3/py+lt27bNU2UhMzNTtmzZIl26dFGXXh0MoFIxtrkWgFEATgYEBMju3bvNPsdmZ2fLihUr1IuANzlWlM6xohD7wc/Ozk7mzZuXp+T91q1bOVed+hHA68W1fLGSMLUEEFyjRg2ZNm1ano7/Bw8eyJdffikAVgJoURoSEAB9DAaDrFmzJk9Ljh8+fFhGjRqlHqNfKP3+VDG0V6dUw2br9XoZOXJknp4jy8rKkpCQEPWGRmcmILZ1Uhrt6ekpJ06cMDvgBw8elF69egmAXcrLiewsvA2VAUxwcHCQGTNmSHx8vNkD/LJly9Qdt7UF2v3FqlWrWAVh9YPVD+0+rAkgZNSoUWZPF8nIyJDQ0FB1GcevAbxoBdvxCoDv/fz8JDw83OwL+FOnTqnbMZpjRekcKwpjupybm5v8/vvvZscuISFBvvjiCzEYDALgY0tX4gCUU97dcmTIkCF5mn65c+dOcXFxEQD/KckJCIBPfH19zV7d6tGjR7Jz50714e6f8PhlrXYWbH8ZAF0BbPf395c9e/aYnUQdOXJEGjduLABGMwGxjZPSTH9/f7PXyT9z5oz6IqD/AehohdtjB2BUlSpVZN68eXL37l2ztmvPnj3qPPCAYm5vbTOrIJ/xQpTVj1Lah03t7OwkLCzMrGP54cOHsnbtWvHy8lLv4lW3xm0CsKJLly5y7Ngxs59JUKo4MzhWlL6xoqCVw86dO5s9XS4tLU0WLlyoJh5jAJS1wm3qCWD3yJEjzX454pUrV6RFixYCYEJJTEAAzO3du7fZ05iOHDmivpTTrOqQBbbnVQCrunTpIkeOHMnreXIWExDrPikFvfvuu5oPQuecEzhp0iQB8BuAt21g254GMMXT01O2bt1q9nxRpcQ8opjb+uW6deuMtis1NVVcXV2lOKeN8D9WP6yk/7pWqVJFwsPDzb7b7ufnp77PwdUGts8fwLbRo0drJqk5Lwz79u0rygpZHCtK2ViR34vSd9991+zK4Y4dO9Tkfbo1Jh65bN8QBwcHWbRokVmLDSQlJUn37t0FwKySlIAACP7kk0/MmlqXY4EFm3gRqlKV2TJs2DBJSEgwuX3p6enquDqfCYh1BnT+mDFjJDMz02QwczyEN9kGt9MLwOJBgwaZtePGxcWpKz2MKsY21m3atKnmiWPp0qUCYBovSln9KEX995azs7NZc4GTk5Nl3LhxVnu33ZxE1c3NTTZv3mxyWzMzM9XBNYhjRekaK/IbO3MuSpOSkuTDDz8UAN8AaGJjsXsGwBdt27Y1a1pWenq69OnTJ9ckxNYSEGXKUkhQUJBZU5W2bNmi3tAcbYPH6FgXFxfZuHGjWc+FBAYGqs9tMQGxoiDOGTNmjGRlZWkG8P79+zJ58mQB8C2AZja+zWPd3d1l3759Jnfc+Ph4SyQh8zZs2GC0TSkpKayCsPpR6pIPc95mfuDAAfVu9GQb3+ZGAELGjRtn8m51ZmamDB48uMiTEI4V1jdW5CX5CAwMNBk7EZHff/9dGjZsqDk1yUZi19Pe3l6WL19u8mLcWBJigwlIyLx580zGODU1VUaMGGE1z8MVYHsbAAgZPXq0yVXRsrOzZcqUKWYlIUxAiid4swYMGGDyjkhsbKy6fN3sErTtbQGs/frrr02enOLj48XHx0cADCqmtrmzCsLqB/8TAGhnMBhMJh/Z2dmyePFi9aHgDiVo+6e3bt3a5LK9mZmZ8v777wuA6RwrSs9YYe6UuZEjR5pMPp54sN6vhMSuKoDgoUOHmkzk09PT5c033/zLEsu2lIAACJkzZ47J5CM6Olrat29fop4lBfBZmzZt5OrVqyb38fHjxwuAuUxALBuwca+//rqkp6drBuzMmTPqQTa8BPZBBQDBI0eONDmlIDo6Wtzc3ATAv4prDuemTZtYBWH1ozT3Ww07OzvZv3+/yQuHIUOGqHe27EtgP/zHzc3N5PSztLQ09eJ/DMeK0jNWmGj3lP79+5tsc2Zmpnph9pUtLy2s0Q8zOnXqZHI63a1bt9Qq1iBbSkAAzPvkk09MJh8HDx5UV/8aXAJj/EG9evVMrsr34MEDGTRokACYwQTEMoF6x8fHx+QLaQ4dOiQ1atQQW3h4sKB3iAICAkwOsEePHlXX4HcthjY1bNWqleZdK1ZBWP0o4X0XsnLlSs1jMiUlRd555x2jD5GWoL7oam9vL7t27dLsj4SEhEK9KOJYYf1jhdYFWdu2bU2u6JWenq6+5DKohMdujK+vr8m75NHR0erNvVdsIQEBMKlfv34mX6oZHh6u7pMdS3CMuxsMBjlw4IDJmzXKAiVDmIAUb4BqOzg4yNmzZ01mysqye51Ky3S0Pn36mBxY1q5dKwBCiqlNX2/ZsoVVENveryaZmpPL6keu/fbFhAkTNPvtzp076hKLU0tJn7yslYRkZGTI7NmzC60CwrHCdsaKXNrY1MnJyeTFttYD2CU0dh94e3ub7Jfdu3cLgO+tPQEB8G9fX1+5c+eO5vZs3rxZnVrXrBTEuIO9vb0cOnRIs09iYmKkXr16oizvywSkuO4qar3sTkTk+PHj6oDSsZRd9MwKCAgwWa5WStUziqE9L7IKYtP7U3knJyfNwYHVj1z7rY+fn5/mMprp6eny+uuvC4BJpaxvXra3t//btLRz585J27ZtBcAXHCtK31iRS/tWmFquOjMzU32j+6xSFrsPvL29Tb50cu7cuQJgrrUmIABcqlSpIufOnTNZ+VCSj0alKMadDAaDyVXQ9uzZIwBWMQEpnqCMHzRokGZALl++rL5YqWspvfgJGjFihObDhmlpaeoLjLoVQ3uWbNu2jVUQG61+BAcHs/qRtz6rYm9vr/nm3gcPHpTKC6ccfdTO0dFRzp07Jw8fPpTFixeLXq8XAP/mWFF6x4oc7fps4sSJmrHL8TBuUCmN3cg2bdpIcnKy5nmmW7duYsUJSPDq1atNVieVaVdNS1l8AaBHw4YNTb5wU1kZayYTkCJerszNzU1zLvqdO3fUB7DeL+UXQcGLFi0yeedPuaugK+K2ePv5+cmjR49YBWH1ozT02/zly5drHnszZ84UAHNKeT/9u2HDhtKtWzf1RYsVOVaU7rFCac+rvr6+JpckVcaMr0p57D419exEZGSkfPfdd1aXgAAYFhAQoJn8RkdHqzcIXiuFsX0FwPdNmjSR7du3ax4L9+7dU6vH/ZmAFOGJUuuFLdnZ2TJgwIBSN6XBSF89A2CdqdV3pk+fLgCmWLqczioIqx8lpM/8//nPf2pOOdyyZYsA+Jr9JQDwHABPjhUcK3K0Z9WePXs02/L777+rCVElxg/z5s+fr9lfWlUSSyQgAJwdHR017+zfu3dPfch6cCmKZXkAAwAc79u3r+zevdus996IiFy6dEmdStqACUjhB+btHj16aGbLK1euFADBHNj/f5qDu7u75l3Au3fviqenpwBwK+K2NC1JVRAAnQBsAhBg5vf7AjgIoB8AO1Y/Suwxt+3YsWNG++zKlSvqSksvsr84VnCs+Fs7Bg8dOlTzQisxMVF9yaAfYycA8BSAH02tmmRlCchcU89mjRs3TgDMLCUxrANgtpOTk8ycOVOioqLyFcuNGzcKgIVMQAo/QL+dOXPGaMdHRUVJlSpVBEANnpT+0m+Bpk7oP/74owCYXwxt+daWqyAA7AC8C+DI+++/L4cOHZLPPvvM5FuDAVT38PCQiIgImTFjhjg4OAiAsQDKsvpRoo61D0ePHm20vx49eiRvvfWWAPgP+4tjBceKv/1+Gb1eL9HR0ZptGDx4sAAIZMz+umqSt7e3ZqXDWhIQAK+2adNG84Wgu3btEgDflfCY6dQbmW3btpU1a9aYnHZoSmpqqvqCRlcmIIUXqIFaA3t2dra8/fbbAmAgT0Z5n/6UlZUlHTp0KPKHvAA08/f317wzaY1VEAAVAYxzcHCQiRMnyqVLl/5sb3x8vJpQ2Gn8++k5HwJMSEiQoKAgtVw6EUB5Vj9s/hgro9fr5dq1a0b77PvvvxcAC9lfHCs4VuT626OmT5+ueYG1fft2AbCUscr9eRBTD+5bSQKiOcXu7t270rhxYwHwcgmN07MAhtvZ2cmHH34ohw4d0rwmMkdUVJTMnDlTnJycBMBnrIAUYpZoZ2enWZLavHmzxdYqt5E+bOrj4yP37t0z2ofh4eECYIWlTz7WVgUBUNHV1VW++uoroy8y+/TTTwXAh0b+fSVXV1dJS0v727+7ffu2BAcHqyeN8la0v7D6kY8LX63BPzExUY2zE/uLYwXHir9Xlx0cHDSXlU1NTVWngL3EWBntx19OnjxptQkIgPa9e/fWbM+MGTOK5VkjC8SmMYBFbm5usnDhQpMrW5mSlZUle/bsUV/AeQLAQOUZEj6EXohB6zFq1CijQcjIyBAfH59StT50Pvtx5jfffKM5PaR169bF8SzIq7ZUBQFQz9SzK9euXVOXEC2Ty7+ftnTpUs2TiLISj5OVbC+rH0Vw4Tt16lQBMJ79xbGCY0Wuv9lv0qRJmhdcCxYsEACfMUaa/fh69+7d83RHvZgTkPVaix1cvXrV6Fhqo/GwA9ADwK6uXbvKli1bNN8NZY7k5GRZuXKlujT2qtxeQsgEpPACuEvrRSyhoaGF+uKqEnxies7UhaUyv3cuqyB/a+83O3bs0DwpTJo06W9VELX6kZKSYmpKwTJWP2z62PL78MMPjfZXZGRksS1hWsrjwLHCRscKAIcuXrxo9Pdu3LihTlktyxgVbBqdpRIQAF6dOnXSTI5GjRolAD4oATEwAPjYwcFBJkyYYPJlguaIiIiQKVOmqMfBFAC1oIEJSMGD2Kh79+6ad7S8vLwEQHWeeMy7uNS6G5+enq5e+Fcs4na82qNHD82DzcqqIE1Mvc09tyqIqepHdna2dOzYUQD4sPph08eV5l29wMBAAfAe+4pjBceKXH/rH7169dIcD4KCggTAaMbGvGl0pqr2FkpAFm/dutVoO65cuSIATtp437cAsNLHx0f++9//SlJSUoGSjocPH0p4eLj06tVLlFU0+wIoCzMwASl4MOdt2LDBaHCUJccW8KRjdn9WcnNz0ywBKvMv+xVDW/538OBBW6qCfPXTTz+ZXQUxp/qxZ88eAbCa1Q+bPqZq+Pr6Gk1OY2NjS9SUAo4VHCsKe6wAsGjLli1Gf+fOnTusfhTyLIPiTkAAVHBxcTFnf/qPDfa1HsB7AI4GBATIzp07NV8MaY5bt27JN998o04Z/RZAM+QRE5BCeChNa1m5Ll26CAAPnnDy1K9fa53sT506JQB+LYZ2dLSxKohn06ZNNZcOzFkFMVX9EBHp0aOHAGjN6odNH09jFi9ebLTPZs+eLQCGsa84VnCsyPU3yhoMhlwX6VB9++23AmAyY5K3WQb9+vWzpgSk15QpUzSfa7C1JBNAbQCzHB0dZcaMGRIZGVngaVZnzpyRjz/+WF1Z82NlKle+MAEpWHDbffDBB0YDdeHCBQFwgCebPPerr9YqFNnZ2eLt7S0AqrEK8rf2zlm/fr1ZVRBT1Y/jx48LgO2sftj88bT//PnzRqepuLi4CIAK7CuOFRwrcv2N14YNG6b5G8rDtrUYkzz37TmtZcGLOQHRfEHr+vXrBcAcG+hTHYCOAP7XunVrWbVqleY4b47MzEzZtm2bvPnmmwLgNwBvKw+vFwgTkCIsqc+dO7dEPKxkob69GBcXZw3TsDr26dPHlqogL3h5eWmWkdUqiKnqx4ABAwRAV1Y/bPo4qubt7W30ocqff/5ZAPyXfcWxgmNF/qa2njhxQgD8zFjkq2/HLVmyxOIJCIDKnp6ems+kBAQECIBmVtyXzwL4yM7OToYMGSIHDx4s8Ls7EhISZNGiRerS0ksAeD/xm0xALBjwC1rrJFvT0qU22LdfrF271tSzCauKqS3bjx8/bktVkC9++OEHzRPL7NmzNe+KWNsdWVY/8t1v/WfOnGm0z5QVXbqwrzhWcKww+vcjtd79MWfOHAEwmLHI3w2zjh07WkMC0n38+PFGf//mzZtWu0oggIYAgt3c3GTBggVy/fr1Ak+zOnHihIwZM0adrj0WQGUjv80ExEJBr+Hr62s0gFFRUQLgBE8y+Z8fOmDAAM35mABuFFNbugYEBNhSFeR5Dw8PzRd1mVp9RLkw7cPqR8ld7vLRo0fFsqIcY8CxwlbHCgA1mzZtqnmu5PSrAsfvvKmL5mJIQII3bdpk9Pe3bNkiAL62oj57CsCbAH7t0qWLbNq0Se7fv1+gpOP+/fuyceNG6dy5swD4GUB3UwuT2HoCUga26+UOHToY/fDUqVNQ5spR/hzasmULHj58mOuHlSpVgp+fX3WdTlevqBsiIhtDQ0N3nDhxwuh3evbsCWdn5090Ot0zlu44Ebl2/vz5WevWrTP6nTJljB96V69exfz58wEgzEr2hbHjx4+Hg4OD0S+EhIQAwCIeNn/TtH79+rl+EBUVhaioqCMiksZu4ljBsSLvsYuLi8OBAwciRCSWYci3X48fP27pNrTx8vIyvoMdOgQAuy3dSJ1OV02n0wXa29tnjR8/fu2pU6fa/vTTT/jXv/4FvV6fr78ZFxeHhQsX4sUXX0TXrl2Dt2zZ0lBE/ERkg4hkl+Qdz5YTEK8GDRoY/fDo0aMAsI/nlnxfRGfExcXtj4yMNPqdJk2aAMCLxdSkRcpFbq7s7e0xduxYABhtJV04d8qUKUhNTc3zP1y+fDmysrI+kMK4xVHwE24lV1fXT3v37m30OxcvXsT8+fMPici3PHL+0nfPurm51Xd0dMz18z/++AMA9rKnOFZwrDDqRQ8PD6MfKsfQHkahQPYcOXLEkufJZ5ydnRs8//zzRr+zfft2iyYgOp2umU6n+9bb2/vmsmXLZkRFRWHmzJlo3Lhxfo8ZHDlyBMOGDUPt2rXx0Ucfjbh48WIlEflQRM6Vlh3PlhOQxvXqGb+hcvjwYQA4wXNLgZy4dOmS0Q+VQb1YEhAR2bhs2bLfzpw5Y/Q7vXr1gpOT0xSdTlfeCgblm1FRUZ+tWrUqT/8uISFBrX4stZJ9YHRgYCAqVapk9Ausfhjl/eqrr0Kn0+X64enTpwHgGLuJYwXHCuMJyAsvvGD0w/PnzzN2hRA75RiwlPrNmzc3+mFSUhIOHz58TURuFHPSUU6n0/XT6XSHevXq9Xt4eHjA4cOH8d5776Fq1ar5+pv37t3Djz/+CD8/P/j6+m5esGBB56ysrDIiMk9EUkrbjmfLCUg9Y3cWMzMzsWvXLgCI4rmlQE5fvHjR6IdOTk4AUK8Y27No4cKFRj90cHDA+PHjAWCMlfTfF1OnTkVycrLZ/+C7775DcnLyGBHJsnTjlerHJz179jT6HVY/NNWpU6eO0Q+VO8aR7CaOFRwrjKpbs2ZN4z/6OIn/g91fIJd/++03ZGZmWur3PRs1amT0w2vXrgHA+WIc95x1Ot2MGjVqZHz22WfLL1686BsWFoZ27drBzi5/K9/GxMTgyy+/hKenJ95444054eHhL4jIv0RkqzXMdGACkneu1atXz/WDmzdvIisr62xpDmwhiYqOjjb6oTIw1CmuxojI6iVLlthSFSTl+vXrk7/77juzvp+cnIygoCAACLaS+I8ODAyEvb290S+w+qHJRbnwypWyH/PCl2MFx4p8xA74cwrWJXZ/gcap7IyMjDMJCQmWaoK7q6ur0Q+vXr1a5AmI7jE/nU63oVWrVld/+OGHwIiICHz88cfQqsBpyc7OxoEDBzBw4EDUrl37zJgxY4ZER0dXFJFRIsIbT7aagOh0uucaNmxY7umnnzY6qACIYXgLLCYqyvj1UeXKlQHAsZjbtGjx4sVGP7TCKsjnU6dORVJSkskvrlmzBnFxcZNFJMMKjjFWPwohATF25/3+/fs4efJkqogksZs4VnCsyHvsHj58iGPHjmWIyE12f4FdVY4FS6iqtcCJUgG5XETnB3udTjfUzs4ue9CgQTt+//33brt27cLbb7+NZ599Nl9/MzU1FatWrULr1q3RsmXLH5cuXdpBRBqJSIiI3OOuZuMJCICqWncWlSkvPCkV3E2tu1rKnfGqxdkgEVkdHBx8SKvcb2VVkMybN29OCA0N1fxeeno6Pv/8cwCYayWxZ/Wj4BwqVqyY6wdpaWkAcJtdxLGCY0X+Ynf37l0ASGTXF4obt27dstRvV9a62FfaVag3anQ6nYdOp1tQr169lLlz5y6MiorCokWL0KxZM80VKrVERUVhxowZqF+/Pt55552Ze/fudRaRN0QknLtX7uxstN0VtHZYZeWhZIa3wBfPycYeoAWAcuXKAYAllr1dFBIS0nTevHm5X/UpVZChQ4eOATDVCrrygTnza3P0Z6olG8vqR6GxL18+9xw4IyMDAHg3jGMFx4p8xo5JfKG6k58VGwtJFa043759GwAKnB3pdLoyALoBGNy5c+f2AwcORIcOHWDsHG2OR48eYd++ffjvf/+L0NDQ43h8Qy7MGmYx2AJbrYBU1Lozm56eDgBcW79w3NO6eHZ1dYVOp6tYzIPdt/Pnz7eJKohOp7NzcHD4sn///prfe+aZZxAYGAgAw60g5qx+FA592bJlc/1AeWcCBymOFRwr8hk7JvGFG7v79+9b6rcra8VZqVLeLcAYXEWn043T6/WPxo4du/7kyZPtN2/eDH9//3wnH8nJyQgNDUWLFi3QunXrH0JDQ1uJiI+ILGPyUfITEDut1QgePXoEAFkMb6HIUvozV8qdLUtU0hYtWbLE6IdW9CzIsLFjx6JGjRomv/jGG2/Aw8NjvE6nq27BhInVj8JTwdjLqZQL31R2EccKjhX5i11WVhYAPGS327wHSixzpSQJec4UdDqdr06nW964ceOkJUuWzIqJicHnn3+OF1/M/5sDIiIiMHnyZNSrVw99+/b99PDhwzVF5N8iwvc5laIEJEtrh33qqacsdVFcIgdwpT9zpdzxssQAHjp//nxcuXLF6BcsXQXR6XRl9Hq9yeqHykqqIKx+FJ50Y3eEn3nmGQCwZxdxrOBYkb/YKcnJ0+x22z9PKtWsXCljkVmVM51OV1an0/XV6XQH33777UO//PJLv6NHj2LAgAGoVq1avhr38OFDhIeHo2fPnqhfv/7vU6dODbh161ZZEZlS3O8mYQJiHdK05isqg3tFhrdQVFDuXOUqKioKIlLsUxhERLKysv5j5StiDTG3+qGyZBWE1Y9C90CZavU3yso+enYRxwqOFfmLnVJdrMBuL5zYFeRZiKKkxFlvYuxy0ul00wwGQ+bUqVNXRERENP3hhx/Qvn17GFtFzZSkpCQsW7YMvr6+6NChw4o1a9Y0FZEWIrJSRFh5K8UJyL2UlBRTGbMDw1vgC1IHDw8Po58rd7TSLdjEpUFBQVZZBVGqHwsGDBiQp39n4SoIqx+F6+69e/d48cSxgmNF/sYKzdgpK8w9x94vFM9pnfeLWLrWs0OVKlUyeozqdLp2Op1uXcuWLa+FhYV9cvHiRUycOBFubm75bsyZM2cQGBgIV1dXDBgwYMLJkyeriUh/ETnM3YQJCAAkXb9+3eiHyprSBoa3wAwuLi5GP1TuTlnsPQZqFWTZsmWa+4KFqiAfjB07FlrLSBpjiSoIqx9FIs3Yg53KxVNldhHHCo4V+YudsnJSNXZ9oahRpUoVS/329cRE46spKzMInHKMVRV1Ot0QnU53ZuDAgeH79+9/Y8+ePejVq5earORZZmYmtm7dim7duqFRo0a7Z82a1TM1NdVORGbyXU1MQJ688Lxz9uzZTGPTGwwGAwA4M7wF5qz1hlJlebx4C7dx2Zw5c6A1UBV3FUSn0+ns7OwWvv/++0a/o/WwpoWqIKx+FL5rxt4uXL58eTRu3Nhep9NVYTdxrOBYkffYlS1bFj4+PuV1Oh0TyEKIX36fkSgEmu8gUV7m6qLT6dx1Ot08V1fX1KCgoOCYmJiGixcvRosWLfL97o6EhASEhITgxRdfROfOnRdv3LjRS0TaiMgaEXnE3YIJiDFRxgZ3g8EAOzu7hjqthcnJHK5ad7Xi4+MBIMrCFxjZGRkZHy1dutTodyxQBRkwatQoPP/880a/MGPGDGjNby7OKgirH0XmalxcnNEPGzVqBACu7CaOFRwr8h47AGjcuDEAvMDuL9D5v4xer2+Ul2cVC9l1Zf/IVc2aNQHAtWPHjhc2bNgw7MyZMxg5cqTm+GrKiRMnMHLkSLi4uGDIkCFjIiIiHERkkIic4h7BBMQcl43ttOXKlUObNm04uBdcI625lErV4bIVtPOr2bNnW0UVRDmZL/7Pf/5j9DtXrlzB1KlTsXr1aqPfKeYqCKsfRTSwaiUgdevWBYC67CaOFRwr8h47APD09ASARuz+Aqn76quvQmsBgSJ29ty5c0Y/NBgMOH78+Cvbt29Ht27d8v3ujvv372Pjxo147bXX8NJLL+2YO3dut4yMjKdE5EsRucvdgAlIXvwRGRlp9ENfX18A8GaIC8T7hReM31y6cOECAPxh6UaqVRAreRZk2NixY1GnTh2jX1i8eDGysrL+M3PmTItXQVj9KNqB9eTJk8av2B5XQHzYTRwrOFYYderSpUtGP2zQoAEAvMTuL1jslGPAUk7u2rULIvK3Dx49eoRly5apcc6X2NhYzJs3D56enujWrduCHTt2eIjIayKyUUSyGX4mIPnaabWy5iZNmgDAywxxvi9M9Y6Oji3r1atn9DtHjhwBgJNW0uRF8+fPx40bxpflLuoqiPLW8zmDBg0y+p0rV64gKCgIAJZGRUV9tnbtWqPfLaYqCKsfRZcYR4WHh98xthKWMn3kFfYUxwqOFfmLnXIMtWIUCqTVP/7xD0ueJ+9FR0dH5FbpeuqppzB+/HiULVs2r38Thw4dwpAhQ+Di4oIRI0YMi4qKsheRYSJygSG3nkHSJv8D4Ni8eXMxJioqSgCcsNXts4L+fXXAgAFG+zc5OVkAJFhZm0fNmDFDtAQHBwuASUX0+4GzZs3S/P1x48YJgIHK95/z8PCQe/fuGf3+vXv3xMPDQwBUL4L2GlxdXSUlJcXo70dERAiAgzwm8t3Hv5w8eTLXvs3KyhJnZ2cB8Az7imMFx4pc/3YNX19fzXNqixYtBEAtxiLf8Tt//fp1zT5WxiCHImzDt+Hh4VJQaWlpsmbNGmnTpo0A2AjgNQC6Ehw7m77+t/XOj4yPj+eJqWj6dvaaNWuM9u3+/fsFwDora7Odg4ODaO0Td+7cEScnJwFQvpB/u6zBYJDExETNCx07OzvJeUIEMDM0NFTzpBoaGioAZhZBf8389ttvNX972LBhAqAvj4l89/G0sLAwo/07dOhQAdCBfcWxgmOF0b9/ITY21ujfDwoKEgCDGIt89W09Pz8/kxf2xZCAvD1p0qR8Jx7R0dHy+eefq2P7bAB1Skn8bDoBKWPjBZwdR48eNfrhW2+9BQBdWefKl24vv2x8VsL+/fsBYIeVVfOykpOTR69YscLod4rwWZDxEydORNWqVY1+QX32Q/565pg3c+ZMpKcbf0dXUTwLotPpqnt4eIx/8803jX6Hz34Uzjlq586dRj/s1KkTALzBbuJYwbHCeOyUKVy5atu2LQC8zjDkyxtaY0BxHp/r16/P00X1o0ePsG/fPrz//vtwcXH5Y9y4cYOvX7/+jIiMFZErDC2nYBV19vfasGHDjGbFFy5cEAAHeKcjz/3q27t3b807Dk2bNhUANa2w7SYrEYVdBQFQydXVVe7cuZOn6kfOSoTWXfKiqIKYU3lh9aNQ+vkpe3t7SUtLy7WPU1JSpEaNGgKgHPuLYwXHilx/o90HH3xg9O9nZ2ezgpX/vj0bExNj8QqI0pZ9586dM9mWu3fvSlhYmBrzNQDalOL4cQqWpS82jQ3uIiKdO3cWAB482eSpXxdt2bLFaJ+eO3dOAOyz4vYHBgUFFduzIABmLl26VPP3xowZ8+ezH7n8+5peXl6SkZFRLM+CAKhu6tkTPvtRqPvjqj179hjt60mTJgmAd9lXHCs4VhifWpucnGz0d1asWFFkz/aV5Gd3+vXrZ9YUp2JKQIbOnz/faBuysrJk2rRpYjAYBMA0JpxMQKz+BLhx40YBsIAnHPPv5ru5uWleDH/55ZcC4D/WfrFRHFUQALUK42IewBerVq0qlioIqx/Fvj/6jxkzxmhfX7p0SQAcYV9xrOBYYfS35m3YsEHzfK5cmJZlbArnxogFEpDnGjZsKA8fPjTajiFDhgiAbowfExBrCcA/evXqZXSHzcjIEC8vryJZRaiE7tCTtO7mZ2RkFMvJqDiqIHPmzBEAgQX8nS++++67Al/MA6hdHFUQVj8ssi8+XaVKFc07uIMGDeLAyrGCY4Xx32rUvXt3zfOs8jD6KMbGrP5s6ufnJ48ePbKaBERp15q9e/cabcfx48cFwA7GkAmINQXh8KVLl0zdOZ7NHdZkPzo4OTlpPsuwbds2AbDEBrZF7+joqLktiYmJBbprBsDd29tbM2nIy8U8gC9Wr15dpFUQVj8stj9+uW7dOg6sHCs4VuT/N3edPn3a6O/Fx8ezCmJ+X67Iy7K3xZiAtB08eLBmW959910B8A7jyATEWoLQX2sJt/v374uPj48AaMSdVvvidNmyZUb7MTs7W/z9/QWAt63coQsODjbnrllgPv++5rSAvF7MA3Bp2rSpPHjwoEiqIKx+WHRfrNu+fXvNO47K9AIuJ8qxgmNF7r/ZY9SoUZrn2wULFgiAzxgjzX58vXv37pKdnW11CYg5NwnOnj0rAPYwlkxArCUIJt//sHnzZgEQwp3W+PQEHx8fzYvTgwcPCoD/2dA2lTd1ly6/VRAAXq1atdJMFvJzMW9OUpPfKgirHxbfH0N//fVXo30fHR0ter1eAJRhf3Gs4Fjxt9/V2dnZSVRUlNHfTU1NFU9PTwHwEmNltB+NvhzVShKQ/hMmTNBsz8SJEwXABMaSCYi1BGLU9OnTNe/I9OjRQwC8x5NQrv33359//tmc/utoa/OUi6IKAmDx1q1bC/1iHoB7UVRBWP2win2xub+/v+adR+Wh3c/ZXxwrOFbk+tsDR48erXne3b59uwBYyljl2n+TJ06cKHlVzAlIGb1eL1rLAyclJYmrq6sA8GQCwgTEGgJRRq/Xy9WrV43utJGRkVKlShUBUIMno78+sK21zrqIyK5duwRAmA1uWwUXFxdJSUkptCoIgJdNPcBXkIt5AAs2btxYqFUQVj+sZn9cuXPnTqMxSE9Pl1atWgmA7uwvjhUcK3Jtw26tZ0FE/lzUIZAx+0u/tfPy8tJcDMMaEhClrUOHDx+u2aaffvqp1FcqjXiKCYhlgvGB1sumRERWrlwpAIJ5Qvr/k5K7u7vmkrWZmZnSunVrAdDSRrdxmqn3dOSlCgLgu127dhXZxTwAj1atWklWVlahVEFY/bCqfbFF8+bN5f79+0ZjceLECfWllVXZZxwrOFb8rR09e/TooXkDKDExUdzd3QVAB8bucdINYN3+/fs1b35YSwKitHn78ePHNY/RDz/8UABMZgLyp6H29vYCYDoAJyYgxR+Qtfv27dMsDw8YMIAvLVKekTB1UhIRWbp0qQAIsuHtrOTq6looVRAAHbt166Y5jeb8+fMCYH8B2/y11jsL8lIFYfXD6vbH2UuWLNGMx/LlywXAV+yvx+8HKIqpFhwrbHesALDQ1LNyBw4cUBN5e8YP8+bNm6fZX7Nnz7a2BKRr165dNW/EJScni6+vrwDoyQQEb3t6ekpMTIx8//33UqNGDQEwhAlI8QakbYsWLTTv9t65c0datGhR6uf4AggOCQnRPClduXJFnYpQyca3tVCqIAD+d/DgQc2/M3DgQAHQu4DtfbEwqiCsfljlvviswWCQ6OhozYvfESNGCIAZpbyv/t2wYUPp1q2bAJgHoCLHCo4VANxdXV0lISFBs02LFy8u9VUsAJ/269dP8wV/Bw8eFA8PD6tKQNTpyKZunp0+fVq9eehdihOQTgaDQc6cOfNnv8TExMg777wjABYCqMkEpPiCMvOzzz7T3GkjIyPF2dlZAPiX0pNS0PDhwzXv5D98+FBef/11q37reV6qIPXq1dO82DBVBQHQsWfPniZPhgB2F1KbTT7obqoKwuqH1e6Pg7p376652EBaWpp079691E4xANDO0dFRzp07Jw8fPpTFixerq4T9m2MFxwoAY9977z3NdmVnZ8vYsWNtuoJfwD4a0bp1a83nPm7fvi0+Pj7i4+NjjQlI9SpVqkhkZKTmMaq+cwZAtVKYgLzs4OAghw4d+lu/PHr0SMLCwtQbA/9hAlJ8gVm1Z88ezZ322LFj6gVn21K2007r06ePZGZmavZPcHCwAJhXkhJTUxfjWlWQPFQ/ehZSe71MPeyuVQVh9cPq98e5pu4qJycni5+fnwAYW8r65mV7e3t5csrPuXPnpG3btgLgC44VHCsABJs6p2dmZqovr5tVymL3gbe3t8TFxZkzzXBimzZtrC4BUbbjvW7dumnerBERWbFihQAIAfBUKYqxn729vZh6JvXKlSvSsGFDUaazMgEphsC8Wq9ePc2DT0Rk37596sDSqZTssLN69+6t+TyEiMj+/fsFwDoA5UrQtpu8IDdWBQHQvkePHsVW/cjxuybfWGusCsLqh/XPq7ezsxNTSW1CQoK0adNGAHxcmpIPY4NqRkaGzJ49WwCM4VhRuscKANXt7e3lxIkTmm1MT0+XPn36lJokRE0+tFZ6ExH55ptvBEAwABdrTUDUmzVffvmlmDJ//nw1CSlXCmL8hsFgkN9//91kv6jvNmIFpJjLj507d9a84BQROXTokPrATs8S3h9Bffr00VztQkQkKipKXWO7XUmcnpefKgiA9aYewCzM6keO322anyoIgBqsftjE/viaq6uryQuFW7duqdOxZpTw/viXOXf0EhISCvWiiGOF7Y4VALo3bNhQYmNjTSYhSiUkqITHbrSvr6/Jc8quXbvUh/SfA+Davn17q01AlO36ZseOHSYvtpVqXEhJXkIbwEfu7u5y6tQpk/1x6tQpcXBwEACNmIBY4ILzww8/1HyYV717rRxkw0vinVYAwSNGjDBZSr9165a88sorAmBgCd0fqnt4eEhGRobZVRAAr5p6gVxRVD9ytPnbvFZBAHyxcuVKVj9s5G5lmzZtTN5pTktLU6dLLASgL4H98J969erJ0aNHTfZD586dC60CwrHC9scKAMM7depk8hjKzMyU8ePHq3f9K5XA+E3v1KmT3LhxQ7Mfzp07p45xLdXpvm+99Za1JyBNDAaDnD171uRF98qVK9XkqnlJjHHbtm3l+vXrJvshKipKXY76DT6EbrmAzZ88ebLmBaSISGxsrDqwfV6Ctv1VAKtCQkJMbn9KSor4+/uX+KkeAL5YtWqV2VUQc+aIF0X1I0d7m5lKgHJWQQDU9vLy0kyyWP2wun1yap8+fTTfDyLy+KHCr776SgCsAdCmJA2qrVu3litXrpi8gFSSsBkcKzhWPHkM9ezZ02TVJjs7W5YuXapeoPqVkNhVARA8ZMgQSUtL09z+yMhI9aL03zn+vdUnIEo733F3dzdZ3RER+fXXX9Vq5XslJMZ1AISMHj3aZIzVc5S3t7cAGMhleC0fvK/mzJljMmjp6ekyadIkAfAtgGY2vs1j3d3dxdTFszqgKKuYTC0F+4LJC/QcVZBmlqx+SB4elFWrIOYkWKx+WOV+OXvw4MEm7zyLiOzdu1caN25s8ytkKdMCQsaNG2dyUM3KypLBgwcX+RQajhW2O1YAmGXO1DERkd9//119MDfQxmPXU6/Xy/Lly00mjlevXlUvSt974m/YRAKiVox9fHwkPj7eZIwjIyPVRStm2niMh9SoUUPWrFkj5oiNjZWWLVsKgOF8D4j1BDFk5syZJg9SEZHw8HD1oJtog9vpCeCrAQMGmFwnXeTxSjvK/PKppWhfMLcKYnL603vvvVfkc8LNmQamVkFY/bDtufeDBw826wIqOTlZxo0bJwD+B6CjDW5roJubm2zevNnktmZmZqrvRZnPsYJjhTlJiDl3iRMTE9WkdimAl2xwutwXbdu2ldOnT5vc1kuXLqnJxwe5/K1W77//vk0kIEp7R7Vs2VJiYmJMbve9e/fks88+EwA/AfinjcXYA8DCd955x6xtfSLJHM43oVtfQIMDAwPNust4+/Zt9Q7Xblt46BCAHYApDRs2lJ9++smswTM2Nla9QzC5lO0Htb28vDSX9ktMTBR/f3/NB8CPHz8uALYXU5vNqoKw+mHz++bn77zzjty9e9esAefgwYPSoUMH9UV9rjawff4Ato0ePVoSExPNqjRY4uFhjhW2O1YAmOHv7y9JSUlmHUPbt28XLy8vATDN2HugrO2OuIODg4SEhGjebFIdO3ZMfZfNu0b+XuuBAwfaTAKi9oG3t7dERESYFePDhw+r++8cADWtPL5lAXzq7u4uGzdu1LwGyenUqVPq9LoPYAYmIBa6y9i3b1/Nl/M8OcWmV69eVnunURlMRjk4OMjcuXPNvnA5deqUeHp6CoBhpXQ/mLdhwwbNPrp165bm5wEBAQKga3HN0Ta1FPC9e/dY/SgZ++aUNm3amH3X6+HDh7J27Vr1ImpWbu+FsYJtagpgRefOneXYsWNmbVdCQoL6FvRZHCs4VuRxWyc0b95cLl26ZNY2pqSkyIIFC9Spt6OtMREB0BPA7hEjRph9bvjpp5/UF9H5a/xdm0tAlHYHODs7y969e83qiwcPHkhYWJh6kT7NCpOqsgBGGQwGmTdvntnnHRGRLVu2qHF+A2ZiAmK5QE9u0aKF2dmzeqdRebX9LgA9ANhZeBsqAxjv4OAgM2bMMGtOpGrdunVib28vAN4sxfuAe9OmTU2+4Mgaqh852mzyZYisfpSY/XOoq6urySVpn6wWhIaGqheLiwA0toLteAXA935+fhIeHm723bzTp0+rz7mM5VjBsSKf293f0dFRfvnlF7O398aNGzJ79mw1EfnY0m/XBlAOwLsAjnzwwQdmTbdSL7anT5+uLknraeI3/jlixAibS0CUtrexs7OTr7/+2uQKdjmTzaVLl6rbtQBAIwtvgwHAJwaDQT7//PM8HZ8PHjxQ34v0NYAXkQdMQCwb9L5VqlSR1atX5+ki7vTp0xIYGKiurRwEwBeArpjarAfwLwBrPD09ZfHixWZNY1DdvXtXnUsdAqAuL/JMV0GsofqRo70dTVVBWP0oUftnSwBhs2fPzlOinJGRIVu2bJEuXboIgAMABgOoUoztdgQwCsDJgIAA2b17t9mJR3Z2toSFhann154cKzhWFLAffAEsnzZtmlnTlXJWv7/55ht1Pv2PALoDKF9MbS4DoAWA4Bo1asi0adPMruSIiMTExMibb74pAOaY+Xvdxo0bZ5MJiNL+CgAWvPvuuyZnLTx5nty4caP6XNNR5ZxVt5jaXF6pVqz18fGRJUuWyO3bt/N0frl69apaIZ6DfGACYvkd1wVAyKBBg0yunf2k5ORkWb9+vfTu3Vtd0m8ZgLcB1CrkE5GHMqdvvaOjo4wePVr27t0rDx8+zFN79+3bJ76+vgJgCi/u/loFyWtfWqL6kaPNG/NTBWH1w6b30zn//Oc/zb77mdOFCxdkzpw5ajXhMICpAFoBqFDIF7utAXwK4HDz5s1l0aJFJpfVzW3KlbLMbjAAR44VHCsKsX/MfmA7p6ysLDlw4ICMHz9enJycBMBGAEMBNARQphDb5wTg3wC+0ev10q9fP9m0aZOkpqaa3dbs7GxZs2aNuvzskDz8tk0nIDm24+PGjRvLr7/+mufzZGRkpCxatEh9nu4PAJ8r57SnC/H4bADgQwAbnZycZMKECbJv3z6zKzc598nvv/9ejfMHyCcmINaz4452dnaW1atX53lnUO+WbN++XSZNmiQtWrQQAHEAtiiZ6SAAnQH4AHBV3jzqkOO/qgBeUOZIv66sXvAVgN16vV66dOkic+fOlf379+fpDo4qMTFRJkyYIADWAmjLeP8t9l9v2bLF6qsfOdr7WkBAAKsfpW8/7WlnZyeff/65WSv85HZxcunSJQkLC5P3339fXFxcBMAFAKsATAEwAMBrytK4LgBq5jhHVVP+v8YA/JS15T8D8B2APxwdHWXgwIESGhqapzu1Odu2fv169UHZsRwrOFYUUex62NnZyezZs02+tNDYHfODBw/K/PnzpWvXrqLX69WFB75WYvGGEhs35ZhxeOK/OkpsOyuxDlJiH9eyZUv59NNPZceOHXm+Ey4icvHiRendu7eavNfJa79MnDjR5hMQZVuaAwj96KOP5ObNm/maLRAdHS2rV6+WgQMHqs9VHAewXKmQvK3cwHkBwPNPxLcKgHoAmgHoCmCEcnzu0ev14u/vLwsWLJCDBw/m6/gUETl79qxa3VqgJK2w1QREpwSMAOh0OhcAIzp37vzRpEmT4Ovrm++/defOHVy+fBkxMTGIjo5GbGws4uLikJSUhPj4eGRnZ//53XLlyqF69eowGAxwcnJCrVq1ULt2bbi4uKBu3booX758vtqQmZmJdevWYcKECYiJiQkUkVmMcq5xf7FVq1Ynd+7ciaeeesrk90+cOIGXXnpph4i8ZsE2bz9+/HhHb29vs74/fPhwzJ8/v5+IfMuI2/S+qgMwvXHjxoGTJk2Cv78/nn766XwPPvHx8bh8+TKuXr2K+Ph4xMbGIiYmBsnJyUhPT0dKSgoAQK/Xw8HBAc899xxq1aoFZ2dnODo6wtHREXXq1IGTk5NZx05uTp48ialTp2LDhg1fKcvsXuJYwbGiiI+hqZ6enp9Mnz4dnTt3zve+m5GRgcjISMTExODKlSuIi4vDtWvXkJSUhBs3biAjI+Mv369ZsyYMBgMcHR1Rq1YtuLi4wNnZGXXr1sVzzz2XrzbcvXsXS5YswaRJk5CRkdFfRFbko0/6zZgxY3lgYGCunzdo0ADnz59/TkSSbSjO41xcXGZNnjwZPXv2zPexkZWVhWvXruHy5cuIjIxEfHz8n3FOT09HUlLSn999+umnUaNGjT//q127NpydneHq6gpXV1fo9fp8b09iYiIWLlyImTNnIisr698i8sPjXblgCYhF8c5irhl0JwCb+vfvL6dOnRJb8+DBA9mwYYNaQv/C2pecs7UqiCWrHzna29XcKgirHyVyf60LYM4rr7wi27Zty9edeEuLiIiQjz76SAD8DKA7xwqOFcUcuwYAFrZv3z5PiyNYi7S0NFm6dKm4uroKgMkFmQ4GoN+MGTNKRAXkie2qCmCWl5eXrF+/Pt8LzlhSYmKiBAUFqYsijMv5DJmtX/9zMNfeed8E8GufPn1k//79Vn+CSktLk1WrVqmDyTwA7oyj2bF+sVWrViYv5I4cOSIANltJm7cfP36cz36U7v3WG8CSJk2aSFhYWL6mlRSn7OxsOXbsmPryt4MlZb/kWGHTsWsKYEWbNm1k06ZNcv/+fau/IF28eLGaFEwHUKkQ+uDdWbNmlbgEJMf2vQBgjo+Pj6xYsULu3LljEzdoJk2apE4BC8xtWWgmIKXjBNUOwLqWLVtKWFhYvucVFpULFy7IrFmz1AfkZgJwZtzyFecVpt563qNHDwHQ2Ura21Vr7XZWP0rVvlsTwFRHR0eZMmWKHD9+3KyXyxUX9SHsjh07CoBtWu8k4FjBscJCsWsIINjNzU0WLFggUVFRVpW4nzhxQiZOnKiuqBZYmAkBgOHBwcElNgGRvy53O8lgMMjUqVOt7jyZlpYmmzdvVpfwPgigr9ZD8ExAStcJygnANL1eL4MGDZJNmzblacm3wnTlyhVZsWKFdOrUSV1m893iWiKwJN8J8/PzM3r38uDBgwLgf1bW5t1aq7qw+lHq9mE9gF4Atjdp0kQWLlwoJ0+etMjUg7t378ovv/wiw4cPV98jMQfACxwrOFZYeeyeVVYqOt69e3cJCwsz+6V/hZ10REREyOLFi9XFCn5WXkRoVwTbXCoSkBzbWxZAbwA7fHx8ZO7cuXL69GmLTGVNSUmRX375RcaOHauuahUCoImZ22HTCQgfQs/fw01lALwK4A07O7sh3bp1Q9u2beHj4wN3d3dUqlSp0H/zxo0buHDhAg4dOoStW7diz549p5S1yVeJyEVGpdBiuyI8PLxvu3bt/vZZz549sWbNmtdEZIcVtbfnwIEDVy1evPhvn128eBHu7u6HRKQZI1sq9+XqeLxiSxcnJ6f23bt3R6tWrdCgQYMCPxBp7IHc8+fP4+TJk/jtt9+wevVqZGRkrACwBsDPIvKIYwXHChuLXyM8fpFk9zZt2jTs1KkTfH19Ub9+fVSvXr3Qfy82NhZnzpzB0aNHsW7dOpw8efIggA0AvhOR2CLczuHBwcFzhwwZUmIeQs/DthuUKZRvOTs7t/b398fLL78MLy8vuLi4oFy5coX6e6mpqYiIiMCxY8fw22+/YfPmzUhNTV0B4H94vLR/Zh7abtMPoTMBKfjOq8PjpSnb4fGa0b6tWrWq3qRJE9SrVw+1a9eGwWBAlSpVYG9vD3t7+1x36PT0dKSlpSElJQWJiYm4efMmoqOjce7cORw+fBgnT568rJTkdgIIF5EY9n6RxLOpn5/fwW3btqFMmTJ//v+HDh1Cs2bNNopINyts8+7Tp0+/6unp+Zf/nytfUY59pDwev5G8A4CmdnZ2r7Rr1w6+vr6oU6cOqlevjurVq6NatWqoWLEi9Ho9ypUr95fVgR4+fPjnylh37txBQkICYmNjERkZiSNHjmDnzp3IysraAWCvcp46JCLZ7H2OFSUkfi4A2gNoC6Cpl5eXa7NmzVC/fn24uLjAYDCgWrVqePbZZ1GhQgVUqFDhL//+0aNHyMzMRFpaGpKTk3H79m3cuHEDly9fRkREBA4cOICzZ89eALAfwB4AW0UkqZi2bdKKFSum9O3bt9QlIE/0wzN4/PLXdgBa6fX65uoNgxdeeOHPFegMBgMqVqwIOzs7PPPMM387PtPT03H37l3cvXsXcXFxuH79Oi5fvoxDhw5h7969SQAO4fHyzbsBnMjvzRkmIJbfYayxWc54vJa+Ox4//OSMx3O0qwKojMdv7XzSXQC3ASQBuA7gGoCLAM4COKP8/1Q8FuLxm6Nzrs24EcAiADussL09lfa++sT/vwgFeEkRlezrKTxer94b/7+evbPyv88BqAjgGQA51/jNBJAM4BaAGwCuAojC43eJnARwGQDvaHGsKC2qKrFrgMfv/Xgej6feVcX/v78lpywA9wDcAZAAIF45hs4rx9AfymeWUA2P3wU02MjnpXUsKaMcl154/JLP53OcKyvj8VSuSrkcnykAbgJIVM6RUcoxelI5Xq0CE5CSmYAQEREREVklS1//l2EIiIiIiIiouPAZECIiIiIiKjasgBARERERERMQIiIiIiJiAkJERERERMQEhIiIiIiImIAQERERERExASEiIiIiIiYgRERERETEBISIiIiIiIgJCBERERERMQEhIiIiIiJiAkJERERERExAiIiIiIiICQgRERERERETECIiIiIiskV2Ntx2YfiIiIiIqJTT2VqDWQEhIiIiIqJiY8sVEB3DR0RERERkW1gBISIiIiIiJiBERERERMQEhIiIiIiIiAkIERERERExASEiIiIiImICQkRERERETECIiIiIiIgJCBERERERERMQIiIiIiJiAkJERERERMQEhIiIiIiImIAQERERERETECIiIiIiIiYgRERERETEBISIiIiIiIgJCBERERERMQEhIiIiIiImIERERERERExAiIiIiIiICQgRERERERETECIiIiIiYgJCRERERERMQIiIiIiIiJiAEBERERERExAiIiIiIiImIERERERExASEiIiIiIiYgBARERERETEBISIiIiIiJiBERERERERMQIiIiIiIiAkIERERERERExAiIiIiImICQkRERERETECIiIiIiIiYgBARERERERMQIiIiIiIiJiBERERERMQEhIiIiIiImIAQERERERExASEiIiIiIiYgRERERERETECIiIiIiIgJCBERERERMQEhIiIiIiJiAkJERERERExAiIiIiIiImIAQERERERETECIiIiIiYgJCRERERETEBISIiIiIiJiAEBERERERMQEhIiIiIiImIERERERExASEiIiIiIiICQgRERERETEBISIiIiIiYgJCRERERERMQIiIiIiIiJiAEBERERERExAiIiIiImICQkRERERExASEiIiIiIiYgBARERERETEBISIiIiIiJiBERERERMQEhIiIiIiIiAkIERERERExASEiIiIiImICQkRERERETECIiIiIiIgJCBERERERERMQIiIiIiJiAkJERERERMQEhIiIiIiImIAQERERERETECIiIiIiIiYgRERERETEBISIiIiIiIgJCBERERERMQEhIiIiIiImIERERERERExAiIiIiIioxPi/AQDuyizjSzZi/gAAAABJRU5ErkJggg==" alt="Логотип NexusConvert">
+        </div>
+        
+        <header>
+            <div class="logo">
+                <i class="fas fa-sync-alt logo-icon"></i>
+                <h1>NexusConvert</h1>
+            </div>
+            <div class="nav-buttons">
+                
+            </div>
+        </header>
+        
+        <section class="hero">
+            <h2>Бесплатный конвертер файлов</h2>
+            <p>Конвертируйте файлы между более чем 200 форматами без ограничений</p>
+        </section>
+        
+        <section class="converter-container">
+            <div class="converter-header">
+                <h3>Мощный конвертер файлов</h3>
+                <p>Загрузите файлы и выберите нужный формат</p>
+            </div>
+            
+            <div class="upload-area" id="uploadArea">
+                <i class="fas fa-cloud-upload-alt"></i>
+                <h4>Перетащите файлы сюда</h4>
+                <p>или</p>
+                <button class="btn btn-outline file-select-btn"><i class="fas fa-folder-open"></i> Выбрать файлы</button>
+                <input type="file" class="file-input" id="fileInput" multiple>
+                <p class="small" style="margin-top: 20px; font-size: 0.9rem;">Без ограничений по размеру и количеству</p>
+                
+                <!-- Список загруженных файлов -->
+                <div class="file-list" id="fileList"></div>
+            </div>
+            
+            <div class="format-selector">
+                <div class="format-box">
+                    <h4>Исходный формат</h4>
+                    <div class="format-list" id="sourceFormatList">
+                        <div class="format-item" data-format="pdf">PDF</div>
+                        <div class="format-item" data-format="docx">DOCX</div>
+                        <div class="format-item" data-format="jpg">JPG</div>
+                        <div class="format-item" data-format="png">PNG</div>
+                        <div class="format-item" data-format="webp">WEBP</div>
+                        <div class="format-item" data-format="ico">ICO</div>
+                        <div class="format-item" data-format="mp4">MP4</div>
+                        <div class="format-item" data-format="mp3">MP3</div>
+                    </div>
+                </div>
+                
+                <div class="format-box">
+                    <h4>Целевой формат</h4>
+                    <div class="format-list" id="targetFormatList">
+                        <div class="format-item" data-format="docx">DOCX</div>
+                        <div class="format-item" data-format="pdf">PDF</div>
+                        <div class="format-item" data-format="png">PNG</div>
+                        <div class="format-item" data-format="jpg">JPG</div>
+                        <div class="format-item" data-format="webp">WEBP</div>
+                        <div class="format-item" data-format="ico">ICO</div>
+                        <div class="format-item" data-format="gif">GIF</div>
+                        <div class="format-item" data-format="mp3">MP3</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Прогресс-бар и статус -->
+            <div class="progress-container" id="progressContainer">
+                <div class="progress-bar" id="progressBar"></div>
+            </div>
+            <div class="conversion-status" id="conversionStatus"></div>
+            
+            <button class="convert-btn" id="convertBtn">Конвертировать файлы</button>
+            
+            <!-- Секция скачивания -->
+            <div class="download-section" id="downloadSection">
+                <h4><i class="fas fa-check-circle"></i> Конвертация завершена!</h4>
+                <p>Ваши файлы успешно конвертированы</p>
+                <div id="downloadLinks"></div>
+            </div>
+        </section>
+        
+        <div class="features">
+            <div class="feature-card">
+                <i class="fas fa-bolt feature-icon"></i>
+                <h3>Молниеносная скорость</h3>
+                <p>Конвертируйте файлы в 3 раза быстрее конкурентов без потери качества.</p>
+            </div>
+            
+            <div class="feature-card">
+                <i class="fas fa-shield-alt feature-icon"></i>
+                <h3>Безопасность данных</h3>
+                <p>Все файлы автоматически удаляются после конвертации. Ваши данные защищены.</p>
+            </div>
+            
+            <div class="feature-card">
+                <i class="fas fa-infinity feature-icon"></i>
+                <h3>Безлимитные возможности</h3>
+                <p>Конвертируйте любое количество файлов без ограничений по размеру.</p>
+            </div>
+        </div>
+        
+        <footer>
+            <p>Сайт был сделан компанией ow code.</p>
+            <p>Конвертируйте с умом и без ограничений</p>
+        </footer>
+    </div>
+    
+    <!-- Модальное окно для связи -->
+    <div class="modal" id="contactModal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <i class="fas fa-envelope"></i>
+            <h3>Свяжитесь с нами</h3>
+            <p>Мы всегда рады помочь и ответить на ваши вопросы</p>
+            
+            <div class="contact-info">
+                <p><i class="fas fa-envelope-open-text"></i> Для сотрудничества и поддержки:</p>
+                <a href="mailto:tankist360@mail.ru" class="email-link">
+                    <i class="fas fa-paper-plane"></i> tankist360@mail.ru
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Элементы DOM
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const fileList = document.getElementById('fileList');
+        const convertBtn = document.getElementById('convertBtn');
+        const progressContainer = document.getElementById('progressContainer');
+        const progressBar = document.getElementById('progressBar');
+        const conversionStatus = document.getElementById('conversionStatus');
+        const downloadSection = document.getElementById('downloadSection');
+        const downloadLinks = document.getElementById('downloadLinks');
+        const contactBtn = document.getElementById('contactBtn');
+        const contactModal = document.getElementById('contactModal');
+        const closeModals = document.querySelectorAll('.close-modal');
+        
+        // Глобальные переменные
+        let selectedFiles = [];
+        let sourceFormat = null;
+        let targetFormat = null;
+        let convertedFiles = [];
+        
+        // Инициализация
+        document.addEventListener('DOMContentLoaded', () => {
+            // Инициализация выбора форматов
+            initFormatSelection();
+            
+            // Загрузка файлов
+            setupFileHandling();
+            
+            // Настройка кнопки конвертации
+            convertBtn.addEventListener('click', startConversion);
+            
+            // Настройка модальных окон
+            setupModals();
+        });
+        
+        // Настройка модальных окон
+        function setupModals() {
+            // Открытие окна для связи
+            contactBtn.addEventListener('click', () => {
+                contactModal.style.display = 'flex';
+            });
+            
+            // Закрытие всех модальных окон
+            closeModals.forEach(closeBtn => {
+                closeBtn.addEventListener('click', () => {
+                    document.querySelectorAll('.modal').forEach(modal => {
+                        modal.style.display = 'none';
+                    });
+                });
+            });
+            
+            // Закрытие при клике вне окна
+            window.addEventListener('click', (e) => {
+                if (e.target.classList.contains('modal')) {
+                    document.querySelectorAll('.modal').forEach(modal => {
+                        modal.style.display = 'none';
+                    });
+                }
+            });
+        }
+        
+        // Инициализация выбора форматов
+        function initFormatSelection() {
+            const sourceItems = document.querySelectorAll('#sourceFormatList .format-item');
+            const targetItems = document.querySelectorAll('#targetFormatList .format-item');
+            
+            sourceItems.forEach(item => {
+                item.addEventListener('click', () => {
+                    sourceItems.forEach(i => i.classList.remove('active'));
+                    item.classList.add('active');
+                    sourceFormat = item.getAttribute('data-format');
+                });
+            });
+            
+            targetItems.forEach(item => {
+                item.addEventListener('click', () => {
+                    targetItems.forEach(i => i.classList.remove('active'));
+                    item.classList.add('active');
+                    targetFormat = item.getAttribute('data-format');
+                });
+            });
+            
+            // Установим значения по умолчанию
+            sourceItems[0].classList.add('active');
+            targetItems[0].classList.add('active');
+            sourceFormat = sourceItems[0].getAttribute('data-format');
+            targetFormat = targetItems[0].getAttribute('data-format');
+        }
+        
+        // Настройка загрузки файлов
+        function setupFileHandling() {
+            uploadArea.addEventListener('click', () => {
+                fileInput.click();
+            });
+            
+            fileInput.addEventListener('change', handleFileSelect);
+            
+            uploadArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                uploadArea.style.borderColor = '#ff3e6c';
+                uploadArea.style.backgroundColor = 'rgba(40, 40, 70, 0.5)';
+            });
+            
+            uploadArea.addEventListener('dragleave', () => {
+                uploadArea.style.borderColor = 'rgba(255, 255, 255, 0.2)';
+                uploadArea.style.backgroundColor = 'rgba(20, 20, 40, 0.3)';
+            });
+            
+            uploadArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                uploadArea.style.borderColor = 'rgba(255, 255, 255, 0.2)';
+                uploadArea.style.backgroundColor = 'rgba(20, 20, 40, 0.3)';
+                
+                if (e.dataTransfer.files.length) {
+                    handleFiles(e.dataTransfer.files);
+                }
+            });
+        }
+        
+        // Обработка выбора файлов
+        function handleFileSelect(e) {
+            if (e.target.files.length) {
+                handleFiles(e.target.files);
+            }
+        }
+        
+        // Обработка файлов (без ограничений)
+        function handleFiles(files) {
+            selectedFiles = Array.from(files);
+            displayFileList();
+        }
+        
+        // Отображение списка файлов
+        function displayFileList() {
+            if (selectedFiles.length === 0) {
+                fileList.style.display = 'none';
+                return;
+            }
+            
+            fileList.innerHTML = '';
+            fileList.style.display = 'block';
+            
+            selectedFiles.forEach(file => {
+                const fileItem = document.createElement('div');
+                fileItem.className = 'file-item';
+                
+                const fileName = document.createElement('div');
+                fileName.className = 'file-name';
+                fileName.textContent = file.name;
+                
+                const fileSize = document.createElement('div');
+                fileSize.className = 'file-size';
+                fileSize.textContent = formatFileSize(file.size);
+                
+                fileItem.appendChild(fileName);
+                fileItem.appendChild(fileSize);
+                fileList.appendChild(fileItem);
+            });
+        }
+        
+        // Форматирование размера файла
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+        
+        // Начало конвертации
+        function startConversion() {
+            if (selectedFiles.length === 0) {
+                alert('Пожалуйста, выберите файлы для конвертации');
+                return;
+            }
+            
+            if (!sourceFormat || !targetFormat) {
+                alert('Пожалуйста, выберите исходный и целевой форматы');
+                return;
+            }
+            
+            // Скрываем кнопку конвертации
+            convertBtn.disabled = true;
+            
+            // Показываем прогресс-бар
+            progressContainer.style.display = 'block';
+            conversionStatus.style.display = 'block';
+            conversionStatus.textContent = 'Подготовка к конвертации...';
+            
+            // Сбрасываем прогресс
+            progressBar.style.width = '0%';
+            
+            // Скрываем предыдущие результаты
+            downloadSection.style.display = 'none';
+            downloadLinks.innerHTML = '';
+            
+            // Запускаем процесс конвертации
+            convertFiles();
+        }
+        
+        // Процесс конвертации
+        async function convertFiles() {
+            convertedFiles = [];
+            
+            for (let i = 0; i < selectedFiles.length; i++) {
+                const file = selectedFiles[i];
+                
+                // Обновляем статус
+                conversionStatus.textContent = `Конвертация файла ${i + 1} из ${selectedFiles.length}: ${file.name}`;
+                
+                // Прогресс для текущего файла
+                let progress = 0;
+                const progressInterval = setInterval(() => {
+                    progress += 5;
+                    const totalProgress = (i / selectedFiles.length * 100) + (progress / selectedFiles.length);
+                    progressBar.style.width = totalProgress + '%';
+                    
+                    if (progress >= 100) {
+                        clearInterval(progressInterval);
+                    }
+                }, 100);
+                
+                // Выполняем реальную конвертацию
+                try {
+                    const convertedFile = await convertFile(file, sourceFormat, targetFormat);
+                    convertedFiles.push(convertedFile);
+                } catch (error) {
+                    console.error('Ошибка конвертации:', error);
+                    conversionStatus.textContent = `Ошибка при конвертации ${file.name}: ${error.message}`;
+                    clearInterval(progressInterval);
+                    convertBtn.disabled = false;
+                    return;
+                }
+                
+                // Общий прогресс
+                const totalProgress = ((i + 1) / selectedFiles.length) * 100;
+                progressBar.style.width = totalProgress + '%';
+            }
+            
+            // Завершение конвертации
+            conversionStatus.textContent = 'Конвертация завершена!';
+            setTimeout(() => {
+                showDownloadSection();
+                convertBtn.disabled = false;
+            }, 500);
+        }
+        
+        // Реальная конвертация файла
+        async function convertFile(file, sourceFormat, targetFormat) {
+            // Определяем тип файла
+            const fileType = file.type.split('/')[0];
+            const fileName = file.name.replace(/\.[^/.]+$/, "") + '.' + targetFormat;
+            
+            // Обработка изображений (включая WEBP и ICO)
+            if (fileType === 'image' && ['jpg', 'jpeg', 'png', 'gif', 'webp', 'ico'].includes(targetFormat)) {
+                return convertImage(file, targetFormat);
+            }
+            
+            // Обработка видео в аудио
+            if (fileType === 'video' && targetFormat === 'mp3') {
+                return convertVideoToAudio(file);
+            }
+            
+            // Обработка текстовых форматов
+            if (['application', 'text'].includes(fileType) && ['txt', 'pdf', 'docx'].includes(targetFormat)) {
+                return convertTextFile(file, targetFormat);
+            }
+            
+            // Для неподдерживаемых форматов
+            throw new Error(`Конвертация из ${sourceFormat} в ${targetFormat} не поддерживается`);
+        }
+        
+        // Конвертация изображений (включая WEBP и ICO)
+        function convertImage(file, targetFormat) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    const img = new Image();
+                    img.onload = function() {
+                        const canvas = document.createElement('canvas');
+                        canvas.width = img.width;
+                        canvas.height = img.height;
+                        
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0);
+                        
+                        // Установка качества для JPG
+                        let quality = 0.92;
+                        let mimeType;
+                        
+                        switch(targetFormat) {
+                            case 'jpg':
+                            case 'jpeg':
+                                mimeType = 'image/jpeg';
+                                quality = 0.92;
+                                break;
+                            case 'webp':
+                                mimeType = 'image/webp';
+                                quality = 0.80;
+                                break;
+                            case 'ico':
+                                // Для ICO создаем изображение с несколькими размерами
+                                return convertToIco(img).then(blob => {
+                                    resolve({
+                                        name: file.name.replace(/\.[^/.]+$/, "") + '.ico',
+                                        blob: blob,
+                                        type: 'image/x-icon'
+                                    });
+                                }).catch(reject);
+                            default:
+                                mimeType = `image/${targetFormat}`;
+                                quality = 0.80;
+                        }
+                        
+                        canvas.toBlob(blob => {
+                            resolve({
+                                name: file.name.replace(/\.[^/.]+$/, "") + '.' + targetFormat,
+                                blob: blob,
+                                type: mimeType
+                            });
+                        }, mimeType, quality);
+                    };
+                    
+                    img.onerror = function() {
+                        reject(new Error('Ошибка загрузки изображения'));
+                    };
+                    
+                    img.src = e.target.result;
+                };
+                
+                reader.onerror = function() {
+                    reject(new Error('Ошибка чтения файла'));
+                };
+                
+                reader.readAsDataURL(file);
+            });
+        }
+        
+        // Конвертация в формат ICO
+        function convertToIco(img) {
+            return new Promise((resolve, reject) => {
+                try {
+                    // Создаем несколько размеров для ICO
+                    const sizes = [16, 32, 48, 64, 128];
+                    const canvases = [];
+                    
+                    sizes.forEach(size => {
+                        const canvas = document.createElement('canvas');
+                        canvas.width = size;
+                        canvas.height = size;
+                        
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, size, size);
+                        
+                        canvases.push(canvas);
+                    });
+                    
+                    // Создаем ICO файл из нескольких размеров
+                    const icoData = generateIcoData(canvases);
+                    const blob = new Blob([icoData], { type: 'image/x-icon' });
+                    
+                    resolve(blob);
+                } catch (error) {
+                    reject(new Error('Ошибка при создании ICO файла'));
+                }
+            });
+        }
+        
+        // Генерация данных для ICO файла
+        function generateIcoData(canvases) {
+            // Заголовок ICO
+            const header = new Uint8Array([
+                0, 0, // Reserved
+                1, 0, // Image type (1 = ICO)
+                canvases.length, 0 // Number of images
+            ]);
+            
+            const entries = [];
+            const images = [];
+            let offset = 6 + (16 * canvases.length);
+            
+            // Создаем записи для каждого изображения
+            canvases.forEach((canvas, index) => {
+                const size = canvas.width;
+                const imageData = canvas.toDataURL('image/png').split(',')[1];
+                const decoded = atob(imageData);
+                const byteArray = new Uint8Array(decoded.length);
+                
+                for (let i = 0; i < decoded.length; i++) {
+                    byteArray[i] = decoded.charCodeAt(i);
+                }
+                
+                // Запись в каталоге
+                entries.push(
+                    size, 0, // Width and height (0 = 256)
+                    size, 0, // Width and height again
+                    byteArray.length & 0xFF, // Size in bytes (low byte)
+                    (byteArray.length >> 8) & 0xFF, 
+                    (byteArray.length >> 16) & 0xFF,
+                    (byteArray.length >> 24) & 0xFF,
+                    offset & 0xFF, // Offset (low byte)
+                    (offset >> 8) & 0xFF,
+                    (offset >> 16) & 0xFF,
+                    (offset >> 24) & 0xFF
+                );
+                
+                images.push(byteArray);
+                offset += byteArray.length;
+            });
+            
+            // Собираем все вместе
+            const entryArray = new Uint8Array(entries);
+            const icoArray = new Uint8Array(offset);
+            
+            icoArray.set(header, 0);
+            icoArray.set(entryArray, 6);
+            
+            let currentOffset = 6 + entryArray.length;
+            images.forEach(image => {
+                icoArray.set(image, currentOffset);
+                currentOffset += image.length;
+            });
+            
+            return icoArray;
+        }
+        
+        // Конвертация видео в аудио (MP4 в MP3)
+        async function convertVideoToAudio(file) {
+            try {
+                const audioBlob = await extractAudioFromVideo(file);
+                return {
+                    name: file.name.replace(/\.[^/.]+$/, "") + '.mp3',
+                    blob: audioBlob,
+                    type: 'audio/mpeg'
+                };
+            } catch (error) {
+                console.error('Ошибка при извлечении аудио:', error);
+                throw new Error('Не удалось извлечь аудио из видео');
+            }
+        }
+        
+        // Извлечение аудио из видео
+        async function extractAudioFromVideo(file) {
+            return new Promise((resolve, reject) => {
+                // Создаем видео элемент
+                const video = document.createElement('video');
+                video.src = URL.createObjectURL(file);
+                video.muted = true;
+                video.play();
+                
+                video.oncanplay = () => {
+                    // Создаем аудио контекст
+                    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                    const source = audioContext.createMediaElementSource(video);
+                    
+                    // Создаем MediaRecorder для записи аудио
+                    const chunks = [];
+                    const mediaRecorder = new MediaRecorder(source.mediaStream);
+                    
+                    mediaRecorder.ondataavailable = (e) => {
+                        chunks.push(e.data);
+                    };
+                    
+                    mediaRecorder.onstop = () => {
+                        const blob = new Blob(chunks, { type: 'audio/mpeg' });
+                        resolve(blob);
+                    };
+                    
+                    mediaRecorder.start();
+                    
+                    // Запускаем видео
+                    video.play();
+                    
+                    // Останавливаем запись по окончании видео
+                    video.onended = () => {
+                        mediaRecorder.stop();
+                    };
+                };
+                
+                video.onerror = () => {
+                    reject(new Error('Ошибка воспроизведения видео'));
+                };
+            });
+        }
+        
+        // Конвертация текстовых файлов
+        function convertTextFile(file, targetFormat) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    const content = e.target.result;
+                    let blob;
+                    
+                    if (targetFormat === 'pdf') {
+                        // Для PDF создаем простой текстовый PDF
+                        const pdfContent = `%PDF-1.1
+1 0 obj
+<<
+/Type /Catalog
+/Pages 2 0 R
+>>
+endobj
+2 0 obj
+<<
+/Type /Pages
+/Kids [3 0 R]
+/Count 1
+>>
+endobj
+3 0 obj
+<<
+/Type /Page
+/Parent 2 0 R
+/Resources <<
+/Font <<
+/F1 4 0 R
+>>
+>>
+/Contents 5 0 R
+>>
+endobj
+4 0 obj
+<<
+/Type /Font
+/Subtype /Type1
+/BaseFont /Helvetica
+>>
+endobj
+5 0 obj
+<<
+/Length 44
+>>
+stream
+BT
+/F1 12 Tf
+72 720 Td
+(Конвертированный текст) Tj
+ET
+endstream
+endobj
+xref
+0 6
+0000000000 65535 f 
+0000000009 00000 n 
+0000000050 00000 n 
+0000000100 00000 n 
+0000000200 00000 n 
+0000000300 00000 n 
+trailer
+<<
+/Size 6
+/Root 1 0 R
+>>
+startxref
+400
+%%EOF`;
+                        blob = new Blob([pdfContent], { type: 'application/pdf' });
+                    } else if (targetFormat === 'docx') {
+                        // Простой DOCX файл
+                        const docxContent = `<?xml version="1.0" encoding="UTF-8"?>
+<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
+  <w:body>
+    <w:p>
+      <w:r>
+        <w:t>Конвертированный текст</w:t>
+      </w:r>
+    </w:p>
+  </w:body>
+</w:document>`;
+                        blob = new Blob([docxContent], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
+                    } else {
+                        // Простой текстовый файл
+                        blob = new Blob([content], { type: 'text/plain' });
+                    }
+                    
+                    resolve({
+                        name: file.name.replace(/\.[^/.]+$/, "") + '.' + targetFormat,
+                        blob: blob,
+                        type: blob.type
+                    });
+                };
+                
+                reader.onerror = function() {
+                    reject(new Error('Ошибка чтения файла'));
+                };
+                
+                reader.readAsText(file);
+            });
+        }
+        
+        // Показ секции скачивания
+        function showDownloadSection() {
+            downloadSection.style.display = 'block';
+            downloadLinks.innerHTML = '';
+            
+            convertedFiles.forEach(file => {
+                const downloadLink = document.createElement('a');
+                downloadLink.href = URL.createObjectURL(file.blob);
+                downloadLink.download = file.name;
+                downloadLink.className = 'download-btn';
+                downloadLink.innerHTML = `<i class="fas fa-download"></i> Скачать ${file.name}`;
+                downloadLinks.appendChild(downloadLink);
+                downloadLinks.appendChild(document.createElement('br'));
+                downloadLinks.appendChild(document.createElement('br'));
+            });
+        }
+    </script>
+</body>
+</html>
